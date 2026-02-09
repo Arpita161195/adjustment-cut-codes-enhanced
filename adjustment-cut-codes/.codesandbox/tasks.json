@@ -1,0 +1,13 @@
+{
+  "setupTasks": [],
+  "tasks": {
+    "dev": {
+      "name": "Dev",
+      "command": "python -m http.server 3000 --directory ./static-version",
+      "runAtStart": true,
+      "preview": {
+        "port": 3000
+      }
+    }
+  }
+}
