@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjustment & Cut Codes Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        .fade-in { animation: fadeIn 0.3s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- Header -->
+    <header class="border-b bg-white/95 backdrop-blur">
+        <div class="container mx-auto flex h-16 items-center px-4">
+            <div class="flex items-center space-x-4">
+                <h1 class="text-xl font-semibold">Adjustment & Cut Codes</h1>
+                <span class="text-sm text-gray-500">Management System</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="container mx-auto py-6 px-4">
+        <!-- Stats Cards -->
+        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-6">
+            <div class="rounded-lg border bg-white p-6 shadow-sm">
+                <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <h3 class="text-sm font-medium">Total Codes</h3>
+                    <i data-lucide="database" class="h-4 w-4 text-gray-500"></i>
+                </div>
+                <div class="text-2xl font-bold" id="total-count">4</div>
+                <p class="text-xs text-gray-500">Across all WMS systems</p>
+            </div>
+            
+            <div class="rounded-lg border bg-white p-6 shadow-sm">
+                <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <h3 class="text-sm font-medium">Active Codes</h3>
+                    <i data-lucide="activity" class="h-4 w-4 text-gray-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-green-600" id="active-count">3</div>
+                <p class="text-xs text-gray-500">Currently in use</p>
+            </div>
+            
+            <div class="rounded-lg border bg-white p-6 shadow-sm">
+                <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <h3 class="text-sm font-medium">Archived Codes</h3>
+                    <i data-lucide="archive" class="h-4 w-4 text-gray-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-orange-600" id="archived-count">1</div>
+                <p class="text-xs text-gray-500">Legacy/archived</p>
+            </div>
+            
+            <div class="rounded-lg border bg-white p-6 shadow-sm">
+                <div class="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <h3 class="text-sm font-medium">Duplicates</h3>
+                    <i data-lucide="alert-triangle" class="h-4 w-4 text-gray-500"></i>
+                </div>
+                <div class="text-2xl font-bold text-red-600" id="duplicate-count">0</div>
+                <p class="text-xs text-gray-500">Need attention</p>
+            </div>
+        </div>
+
+        <!-- Advanced Filters Row -->
+        <div class="grid grid-cols-1 md:grid-cols-7 gap-3 mb-4">
+            <select id="filter-source" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                <option value="all">All Source Systems</option>
+                <option value="HighJump">HighJump</option>
+                <option value="RedPrairie">RedPrairie</option>
+                <option value="JDA">JDA</option>
+                <option value="Vision">Vision</option>
+                <option value="PAU/APAC">PAU/APAC</option>
+            </select>
+            <div class="relative">
+                <input id="filter-facility-input" type="text" placeholder="Facility..." autocomplete="off" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm w-full" />
+                <div id="facility-suggestions" class="absolute left-0 right-0 z-20 bg-white border border-gray-300 rounded-md shadow-lg mt-1 hidden max-h-48 overflow-y-auto"></div>
+            </div>
+            <select id="filter-customer" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                <option value="all">All Customers</option>
+            </select>
+            <select id="filter-type" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                <option value="all">All Code Types</option>
+                <option value="Adjustment">Adjustment</option>
+                <option value="Cut">Cut</option>
+            </select>
+            <input id="filter-code" type="text" placeholder="Code..." class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm" />
+            <select id="filter-responsibility" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                <option value="all">All Responsibility</option>
+                <option value="AMC">AMC</option>
+                <option value="Customer">Customer</option>
+                <option value="No Impact">No Impact</option>
+            </select>
+            <select id="filter-category" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                <option value="all">All Categories</option>
+                <option value="Adjustment">Adjustment</option>
+                <option value="Cut">Cut</option>
+            </select>
+        </div>
+        <!-- Search and Actions Bar + Info -->
+        <div class="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between mb-6">
+            <div class="flex flex-1 items-center space-x-2">
+                <div class="relative flex-1 max-w-sm">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4"></i>
+                    <input 
+                        type="text" 
+                        id="search-input"
+                        placeholder="Search codes, descriptions, WMS..."
+                        class="flex h-10 w-full rounded-md border border-gray-300 bg-white px-10 py-2 text-sm ring-offset-white placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                    />
+                </div>
+                <select id="status-filter" class="px-3 py-2 border border-gray-300 rounded-md bg-white text-sm">
+                    <option value="all">All Status</option>
+                    <option value="active">Active</option>
+                    <option value="archived">Archived</option>
+                </select>
+                <button title="Pain Point Solutions" class="ml-2 group relative">
+                    <i data-lucide="info" class="h-5 w-5 text-blue-500"></i>
+                    <div class="hidden group-hover:block absolute z-10 left-1/2 -translate-x-1/2 mt-2 w-80 bg-white border border-gray-300 rounded-lg shadow-lg p-4 text-xs text-gray-700">
+                        <strong>Pain Points & Solutions</strong>
+                        <ul class="mt-2 space-y-1">
+                            <li><b>Too many codes:</b> Standardize later; move all now</li>
+                            <li><b>Duplicate meanings:</b> Enforce one description per code</li>
+                            <li><b>Customer-specific duplicates:</b> Keep only when required (EDI)</li>
+                            <li><b>WMS confusion:</b> Show WMS + prod/archive in UI</li>
+                            <li><b>Loss of history:</b> Keep archive data up to 12 months</li>
+                            <li><b>Manual cleanup:</b> Enable bulk delete</li>
+                            <li><b>Deleted codes hard to restore:</b> Add re-enable option</li>
+                            <li><b>Poor search:</b> Improve search functionality</li>
+                            <li><b>Bad reporting:</b> Clean data after Compass</li>
+                            <li><b>Training issues:</b> Reduce & standardize codes</li>
+                        </ul>
+                    </div>
+                </button>
+            </div>
+            
+            <div class="flex items-center space-x-2">
+                <button class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50">
+                    <i data-lucide="filter" class="h-4 w-4 mr-2"></i>
+                    Advanced Filter
+                </button>
+                <button class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium hover:bg-gray-50">
+                    <i data-lucide="download" class="h-4 w-4 mr-2"></i>
+                    Export
+                </button>
+                <button onclick="openAddDialog()" class="inline-flex items-center justify-center rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700">
+                    <i data-lucide="plus" class="h-4 w-4 mr-2"></i>
+                    Add Code
+                </button>
+            </div>
+        </div>
+
+        <!-- Bulk Actions Bar (Hidden by default) -->
+        <div id="bulk-actions" class="hidden flex items-center justify-between p-4 bg-gray-100 rounded-lg border mb-6">
+            <div class="flex items-center space-x-4">
+                <span class="text-sm font-medium" id="selected-count">0 items selected</span>
+                <div class="flex items-center space-x-2">
+                    <button class="inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-3 py-1 text-sm font-medium hover:bg-gray-50">
+                        <i data-lucide="archive" class="h-4 w-4 mr-2"></i>
+                        Archive
+                    </button>
+                    <button class="inline-flex items-center justify-center rounded-md bg-red-600 px-3 py-1 text-sm font-medium text-white hover:bg-red-700">
+                        <i data-lucide="trash-2" class="h-4 w-4 mr-2"></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+            <button onclick="clearSelection()" class="inline-flex items-center justify-center rounded-md hover:bg-gray-200 p-1">
+                <i data-lucide="x" class="h-4 w-4"></i>
+            </button>
+        </div>
+
+        <!-- Category & Impact Breakdown Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <!-- Category Breakdown -->
+            <div class="rounded-lg border bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="pie-chart" class="h-4 w-4 mr-2"></i>
+                    Category Breakdown
+                </h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Adjustment</span>
+                        <span class="text-sm font-bold text-blue-600" id="breakdown-adjustment">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Cut</span>
+                        <span class="text-sm font-bold text-green-600" id="breakdown-cut">0</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Impact Breakdown -->
+            <div class="rounded-lg border bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="target" class="h-4 w-4 mr-2"></i>
+                    Impact Breakdown
+                </h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">AMC</span>
+                        <span class="text-sm font-bold text-red-600" id="breakdown-amc">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">Customer</span>
+                        <span class="text-sm font-bold text-purple-600" id="breakdown-customer">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">No Impact</span>
+                        <span class="text-sm font-bold text-gray-600" id="breakdown-no-impact">0</span>
+                    </div>
+                </div>
+            </div>
+            <!-- Instance Breakdown -->
+            <div class="rounded-lg border bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="server" class="h-4 w-4 mr-2"></i>
+                    Instance Breakdown
+                </h3>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">PROD</span>
+                        <span class="text-sm font-bold text-green-600" id="breakdown-prod">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">ARCHIVE</span>
+                        <span class="text-sm font-bold text-orange-600" id="breakdown-archive">0</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-sm text-gray-600">TEST</span>
+                        <span class="text-sm font-bold text-blue-600" id="breakdown-test">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Main Table -->
+        <div class="rounded-md border bg-white">
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b bg-gray-50">
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">
+                                <input type="checkbox" id="select-all" onchange="toggleSelectAll()" class="rounded border-gray-300">
+                            </th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 cursor-pointer hover:text-gray-700" onclick="sortTable('code')">
+                                Code <span id="sort-code"></span>
+                            </th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500 cursor-pointer hover:text-gray-700" onclick="sortTable('description')">
+                                Description <span id="sort-description"></span>
+                            </th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">WMS/Instance</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Facility</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Customer</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Category</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Impact</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Status</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Created By</th>
+                            <th class="h-12 px-4 text-left align-middle font-medium text-gray-500">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- Table Summary Cards -->
+        <div id="table-summary" class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-7 gap-3 my-6">
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Most Common Customer</span>
+                <span class="text-lg font-bold" id="table-common-customer">-</span>
+            </div>
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Most Common Facility</span>
+                <span class="text-lg font-bold" id="table-common-facility">-</span>
+            </div>
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Most Common WMS</span>
+                <span class="text-lg font-bold" id="table-common-wms">-</span>
+            </div>
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Most Common Category</span>
+                <span class="text-lg font-bold" id="table-common-category">-</span>
+            </div>
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Most Common Responsibility</span>
+                <span class="text-lg font-bold" id="table-common-responsibility">-</span>
+            </div>
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Min/Max/Median Created Date</span>
+                <span class="text-lg font-bold" id="table-date-summary">-</span>
+            </div>
+            <div class="rounded-lg border bg-white p-3 shadow-sm flex flex-col items-center">
+                <span class="text-xs text-gray-500">Avg Codes per Customer</span>
+                <span class="text-lg font-bold" id="table-avg-codes-customer">-</span>
+            </div>
+        </div>
+        
+        <!-- Additional Analytics Section -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 my-6">
+            <!-- Code Creation Timeline -->
+            <div class="rounded-lg border bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="calendar" class="h-4 w-4 mr-2"></i>
+                    Recent Code Activity
+                </h3>
+                <div id="recent-activity" class="space-y-2 max-h-48 overflow-y-auto">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Top Contributors -->
+            <div class="rounded-lg border bg-white p-4 shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i data-lucide="users" class="h-4 w-4 mr-2"></i>
+                    Top Contributors
+                </h3>
+                <div id="top-contributors" class="space-y-2">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Visual Chart Section -->
+        <div class="rounded-lg border bg-white p-4 shadow-sm my-6">
+            <h3 class="text-sm font-medium text-gray-700 mb-4 flex items-center">
+                <i data-lucide="bar-chart-3" class="h-4 w-4 mr-2"></i>
+                Code Distribution by WMS
+            </h3>
+            <div id="wms-chart" class="space-y-3">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Add Code Modal -->
+    <div id="add-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl">
+            <div class="flex items-center justify-between p-6 border-b">
+                <h2 class="text-lg font-semibold">Add New Code</h2>
+                <button onclick="closeAddDialog()" class="text-gray-400 hover:text-gray-600">
+                    <i data-lucide="x" class="h-5 w-5"></i>
+                </button>
+            </div>
+            
+            <form id="add-form" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Code *</label>
+                        <input type="text" id="new-code" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., ADJ001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Category *</label>
+                        <select id="new-category" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="Adjustment">Adjustment</option>
+                            <option value="Cut">Cut</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Description *</label>
+                    <input type="text" id="new-description" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Brief description of the code">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">WMS *</label>
+                        <select id="new-wms" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Select WMS</option>
+                            <option value="HighJump">HighJump</option>
+                            <option value="RedPrairie">RedPrairie</option>
+                            <option value="JDA">JDA</option>
+                            <option value="Vision">Vision</option>
+                            <option value="PAU/APAC">PAU/APAC</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Instance</label>
+                        <select id="new-instance" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="PROD">PROD</option>
+                            <option value="TEST">TEST</option>
+                            <option value="ARCHIVE">ARCHIVE</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Facility *</label>
+                        <input type="text" id="new-facility" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., DC-001">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Customer</label>
+                        <input type="text" id="new-customer" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Customer name or 'All Customers'" value="All Customers">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium mb-2">Impact Type *</label>
+                    <select id="new-impact" required class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="AMC">AMC</option>
+                        <option value="Customer">Customer</option>
+                        <option value="No Impact">No Impact</option>
+                    </select>
+                </div>
+                
+                <div class="flex justify-end space-x-2 pt-4">
+                    <button type="button" onclick="closeAddDialog()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium hover:bg-gray-50">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700">
+                        Add Code
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>

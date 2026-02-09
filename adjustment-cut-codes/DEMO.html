@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adjustment & Cut Codes - Enhanced UI Preview</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        border: 'hsl(214.3 31.8% 91.4%)',
+                        input: 'hsl(214.3 31.8% 91.4%)',
+                        ring: 'hsl(221.2 83.2% 53.3%)',
+                        background: 'hsl(0 0% 100%)',
+                        foreground: 'hsl(222.2 84% 4.9%)',
+                        primary: {
+                            DEFAULT: 'hsl(221.2 83.2% 53.3%)',
+                            foreground: 'hsl(210 40% 98%)'
+                        },
+                        secondary: {
+                            DEFAULT: 'hsl(210 40% 96%)',
+                            foreground: 'hsl(222.2 84% 4.9%)'
+                        },
+                        muted: {
+                            DEFAULT: 'hsl(210 40% 96%)',
+                            foreground: 'hsl(215.4 16.3% 46.9%)'
+                        },
+                        card: {
+                            DEFAULT: 'hsl(0 0% 100%)',
+                            foreground: 'hsl(222.2 84% 4.9%)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        /* Smooth transitions */
+        * { transition: all 0.2s ease; }
+        
+        /* Dark mode styles */
+        .dark { background: #0f172a; color: #e2e8f0; }
+        .dark .bg-white { background: #1e293b !important; }
+        .dark .border-gray-200 { border-color: #374151 !important; }
+        .dark .text-gray-500 { color: #9ca3af !important; }
+        .dark .bg-gray-50 { background: #374151 !important; }
+        
+        /* Notification popup */
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            z-index: 1000;
+            transform: translateX(400px);
+            opacity: 0;
+            animation: slideIn 0.3s ease forwards;
+        }
+        
+        @keyframes slideIn {
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification.success { border-left: 4px solid #10b981; }
+        .notification.info { border-left: 4px solid #3b82f6; }
+        .notification.warning { border-left: 4px solid #f59e0b; }
+        .notification.error { border-left: 4px solid #ef4444; }
+    </style>
+</head>
+<body class="min-h-screen bg-background">
+    <!-- Header -->
+    <header class="sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur">
+        <div class="flex h-16 items-center justify-between px-6">
+            <!-- Logo and Title -->
+            <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2">
+                    <div class="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
+                        <span class="text-white font-bold text-sm">AC</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold">Adjustment & Cut Codes</h1>
+                        <p class="text-sm text-gray-500">WMS Management System</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex items-center space-x-3">
+                <button class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 flex items-center gap-2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                    </svg>
+                    Dashboard
+                </button>
+                
+                <button class="px-3 py-1 text-sm border rounded-md hover:bg-gray-50 flex items-center gap-2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    Export
+                </button>
+                
+                <button class="px-3 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 flex items-center gap-2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                    </svg>
+                    Add Code
+                </button>
+
+                <!-- Divider -->
+                <div class="h-6 w-px bg-gray-200"></div>
+
+                <!-- Theme Toggle -->
+                <button class="p-2 border rounded-md hover:bg-gray-50">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/>
+                    </svg>
+                </button>
+
+                <!-- Notifications -->
+                <button class="p-2 border rounded-md hover:bg-gray-50 relative">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM4.021 19.071l15.55-15.55a1 1 0 011.414 1.414L5.435 20.485"/>
+                    </svg>
+                    <span class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">3</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex h-[calc(100vh-4rem)]">
+        <!-- Sidebar Filters -->
+        <div class="w-80 bg-white border-r border-gray-200 overflow-y-auto">
+            <div class="p-6 space-y-6">
+                <!-- Header -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <svg class="h-5 w-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.707A1 1 0 013 7V4z"/>
+                        </svg>
+                        <h2 class="text-lg font-semibold">Filters</h2>
+                        <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">2</span>
+                    </div>
+                </div>
+
+                <!-- Search -->
+                <div class="bg-white border rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                        <label class="text-sm font-medium">Search</label>
+                    </div>
+                    <div class="relative">
+                        <input type="text" placeholder="Search codes, descriptions..." class="w-full pl-10 pr-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Status Filter -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Status
+                    </h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" checked class="rounded border-gray-300">
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>
+                        </label>
+                        <label class="flex items-center space-x-2">
+                            <input type="checkbox" class="rounded border-gray-300">
+                            <span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">Archived</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- WMS Filter -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+                        </svg>
+                        WMS System
+                    </h3>
+                    <div class="space-y-2 max-h-32 overflow-y-auto">
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" checked class="filter-checkbox" data-filter="wms" data-value="HighJump">
+                            <span class="text-sm">HighJump</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="wms" data-value="RedPrairie">
+                            <span class="text-sm">RedPrairie</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="wms" data-value="JDA">
+                            <span class="text-sm">JDA</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="wms" data-value="Vision">
+                            <span class="text-sm">Vision</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="wms" data-value="Manhattan">
+                            <span class="text-sm">Manhattan</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="wms" data-value="Oracle">
+                            <span class="text-sm">Oracle</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Facility Filter -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h4a1 1 0 011 1v5m-6 0V9a1 1 0 011-1h4a1 1 0 011 1v11"/>
+                        </svg>
+                        Facility
+                    </h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="facility" data-value="DC-001">
+                            <span class="text-sm">DC-001</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="facility" data-value="DC-002">
+                            <span class="text-sm">DC-002</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="facility" data-value="DC-003">
+                            <span class="text-sm">DC-003</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="facility" data-value="DC-004">
+                            <span class="text-sm">DC-004</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Category Filter -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                        </svg>
+                        Category
+                    </h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="category" data-value="Adjustment">
+                            <span class="text-sm">Adjustment</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="category" data-value="Cut">
+                            <span class="text-sm">Cut</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="category" data-value="Transfer">
+                            <span class="text-sm">Transfer</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="category" data-value="Return">
+                            <span class="text-sm">Return</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Impact Type Filter -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                        Impact Type
+                    </h3>
+                    <div class="space-y-2">
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="impact" data-value="AMC">
+                            <span class="text-sm">AMC</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="impact" data-value="Customer">
+                            <span class="text-sm">Customer</span>
+                        </label>
+                        <label class="flex items-center space-x-2 cursor-pointer hover:bg-gray-50 p-1 rounded">
+                            <input type="checkbox" class="filter-checkbox" data-filter="impact" data-value="No Impact">
+                            <span class="text-sm">No Impact</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Saved Filters -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z"/>
+                        </svg>
+                        Saved Filters
+                    </h3>
+                    <div class="space-y-2">
+                        <div class="flex space-x-2">
+                            <input type="text" id="filter-name" placeholder="Filter name..." class="flex-1 px-2 py-1 text-sm border rounded">
+                            <button onclick="saveFilter()" class="px-2 py-1 text-sm bg-blue-600 text-white rounded hover:bg-blue-700">Save</button>
+                        </div>
+                        <div id="saved-filters" class="space-y-1">
+                            <button onclick="loadSavedFilter('active-highjump')" class="w-full text-left px-2 py-1 text-sm hover:bg-gray-100 rounded">Active HighJump</button>
+                            <button onclick="loadSavedFilter('all-archived')" class="w-full text-left px-2 py-1 text-sm hover:bg-gray-100 rounded">All Archived</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Clear Filters -->
+                <button onclick="clearAllFilters()" class="w-full px-4 py-2 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 flex items-center justify-center gap-2">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    Reset All Filters
+                </button>
+
+                <!-- Date Range -->
+                <div class="bg-white border rounded-lg p-4">
+                    <h3 class="text-sm font-medium mb-3 flex items-center gap-2">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                        Date Range
+                    </h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-xs text-gray-500">From</label>
+                            <input type="date" class="w-full mt-1 px-3 py-2 border rounded-md">
+                        </div>
+                        <div>
+                            <label class="text-xs text-gray-500">To</label>
+                            <input type="date" class="w-full mt-1 px-3 py-2 border rounded-md">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Dashboard Metrics -->
+            <div class="p-6 border-b bg-gray-50">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Active Codes</p>
+                                <p class="text-2xl font-bold text-green-600">3</p>
+                            </div>
+                            <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Archived</p>
+                                <p class="text-2xl font-bold text-orange-600">1</p>
+                            </div>
+                            <svg class="h-8 w-8 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Total Filtered</p>
+                                <p class="text-2xl font-bold text-blue-600">4</p>
+                            </div>
+                            <svg class="h-8 w-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg p-4 border">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-500">Filters Applied</p>
+                                <p class="text-2xl font-bold text-purple-600">2</p>
+                            </div>
+                            <svg class="h-8 w-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-auto p-6">
+                <div class="space-y-4">
+                    <!-- Quick Search -->
+                    <div class="flex items-center justify-between">
+                        <div class="relative flex-1 max-w-md">
+                            <input type="text" placeholder="Quick search..." class="w-full pl-10 pr-3 py-2 border rounded-md">
+                            <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                            </svg>
+                        </div>
+                        <div class="text-sm text-gray-500">4 of 4 codes</div>
+                    </div>
+
+                    <!-- Main Table -->
+                    <div class="bg-white rounded-lg border overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">
+                                        <input type="checkbox" class="rounded">
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Code</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Description</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">WMS/Instance</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Facility</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Status</th>
+                                    <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                    <td class="px-4 py-3 font-mono font-medium">ADJ001</td>
+                                    <td class="px-4 py-3">Inventory Count Adjustment</td>
+                                    <td class="px-4 py-3">
+                                        <div class="text-sm">
+                                            <div class="font-medium">HighJump</div>
+                                            <div class="text-gray-500">PROD</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm">DC-001</td>
+                                    <td class="px-4 py-3">
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center space-x-2">
+                                            <button class="p-1 text-gray-400 hover:text-gray-600">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="p-1 text-gray-400 hover:text-gray-600">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-4 py-3"><input type="checkbox" class="rounded"></td>
+                                    <td class="px-4 py-3 font-mono font-medium">CUT001</td>
+                                    <td class="px-4 py-3">Product Discontinued</td>
+                                    <td class="px-4 py-3">
+                                        <div class="text-sm">
+                                            <div class="font-medium">RedPrairie</div>
+                                            <div class="text-gray-500">PROD</div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3 text-sm">DC-002</td>
+                                    <td class="px-4 py-3">
+                                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center space-x-2">
+                                            <button class="p-1 text-gray-400 hover:text-gray-600">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                            </button>
+                                            <button class="p-1 text-gray-400 hover:text-gray-600">
+                                                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mock data
+        const mockData = [
+            { id: '1', code: 'ADJ001', description: 'Inventory Count Adjustment', wms: 'HighJump', instance: 'PROD', facility: 'DC-001', customer: 'All Customers', category: 'Adjustment', impact: 'AMC', status: 'Active' },
+            { id: '2', code: 'CUT001', description: 'Product Discontinued', wms: 'RedPrairie', instance: 'PROD', facility: 'DC-002', customer: 'Customer A', category: 'Cut', impact: 'Customer', status: 'Active' },
+            { id: '3', code: 'ADJ002', description: 'Damage Adjustment', wms: 'JDA', instance: 'ARCHIVE', facility: 'DC-003', customer: 'All Customers', category: 'Adjustment', impact: 'No Impact', status: 'Archived' },
+            { id: '4', code: 'CUT002', description: 'Seasonal Item End', wms: 'Vision', instance: 'PROD', facility: 'DC-001', customer: 'Customer B', category: 'Cut', impact: 'Customer', status: 'Active' },
+            { id: '5', code: 'ADJ003', description: 'Stock Correction', wms: 'Manhattan', instance: 'PROD', facility: 'DC-004', customer: 'All Customers', category: 'Adjustment', impact: 'AMC', status: 'Active' },
+            { id: '6', code: 'TRF001', description: 'Inter-facility Transfer', wms: 'Oracle', instance: 'PROD', facility: 'DC-002', customer: 'Customer C', category: 'Transfer', impact: 'No Impact', status: 'Active' }
+        ];
+
+        let filteredData = [...mockData];
+        let isDarkMode = false;
+        let showDashboard = true;
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            updateTable();
+            updateStats();
+            addEventListeners();
+        });
+
+        function addEventListeners() {
+            // Filter checkboxes
+            document.querySelectorAll('.filter-checkbox').forEach(cb => {
+                cb.addEventListener('change', applyFilters);
+            });
+
+            // Search input
+            document.querySelector('input[placeholder="Quick search..."]').addEventListener('input', applyFilters);
+            document.querySelector('input[placeholder="Search codes, descriptions..."]').addEventListener('input', applyFilters);
+
+            // Header buttons
+            document.querySelectorAll('header button').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const text = this.textContent.trim();
+                    if (text.includes('Dashboard')) toggleDashboard();
+                    else if (text.includes('Export')) showExportDialog();
+                    else if (text.includes('Add Code')) showAddDialog();
+                    else if (this.querySelector('svg')) handleHeaderAction(this);
+                });
+            });
+        }
+
+        function applyFilters() {
+            const searchTerm = document.querySelector('input[placeholder="Quick search..."]').value.toLowerCase() ||
+                             document.querySelector('input[placeholder="Search codes, descriptions..."]').value.toLowerCase();
+            
+            const statusFilters = Array.from(document.querySelectorAll('.filter-checkbox[data-filter="status"]:checked')).map(cb => cb.dataset.value);
+            const wmsFilters = Array.from(document.querySelectorAll('.filter-checkbox[data-filter="wms"]:checked')).map(cb => cb.dataset.value);
+            const facilityFilters = Array.from(document.querySelectorAll('.filter-checkbox[data-filter="facility"]:checked')).map(cb => cb.dataset.value);
+            const categoryFilters = Array.from(document.querySelectorAll('.filter-checkbox[data-filter="category"]:checked')).map(cb => cb.dataset.value);
+            const impactFilters = Array.from(document.querySelectorAll('.filter-checkbox[data-filter="impact"]:checked')).map(cb => cb.dataset.value);
+
+            filteredData = mockData.filter(item => {
+                const matchesSearch = !searchTerm || 
+                    item.code.toLowerCase().includes(searchTerm) ||
+                    item.description.toLowerCase().includes(searchTerm) ||
+                    item.wms.toLowerCase().includes(searchTerm) ||
+                    item.facility.toLowerCase().includes(searchTerm);
+
+                const matchesStatus = statusFilters.length === 0 || statusFilters.includes(item.status);
+                const matchesWms = wmsFilters.length === 0 || wmsFilters.includes(item.wms);
+                const matchesFacility = facilityFilters.length === 0 || facilityFilters.includes(item.facility);
+                const matchesCategory = categoryFilters.length === 0 || categoryFilters.includes(item.category);
+                const matchesImpact = impactFilters.length === 0 || impactFilters.includes(item.impact);
+
+                return matchesSearch && matchesStatus && matchesWms && matchesFacility && matchesCategory && matchesImpact;
+            });
+
+            updateTable();
+            updateStats();
+            updateFilterCounter();
+        }
+
+        function updateTable() {
+            const tbody = document.querySelector('tbody');
+            tbody.innerHTML = '';
+
+            filteredData.forEach(item => {
+                const statusBadge = item.status === 'Active' ? 
+                    '<span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded">Active</span>' :
+                    '<span class="bg-orange-100 text-orange-800 text-xs px-2 py-1 rounded">Archived</span>';
+
+                const row = `
+                    <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="px-4 py-3"><input type="checkbox" class="rounded row-checkbox" data-id="${item.id}"></td>
+                        <td class="px-4 py-3 font-mono font-medium">${item.code}</td>
+                        <td class="px-4 py-3">${item.description}</td>
+                        <td class="px-4 py-3">
+                            <div class="text-sm">
+                                <div class="font-medium">${item.wms}</div>
+                                <div class="text-gray-500">${item.instance}</div>
+                            </div>
+                        </td>
+                        <td class="px-4 py-3 text-sm">${item.facility}</td>
+                        <td class="px-4 py-3">${statusBadge}</td>
+                        <td class="px-4 py-3">
+                            <div class="flex items-center space-x-2">
+                                <button onclick="showNotification('info', 'Code Details', 'Viewing ${item.code} details')" class="p-1 text-gray-400 hover:text-blue-600 transition-colors">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="showNotification('success', 'Edit Mode', 'Editing ${item.code}')" class="p-1 text-gray-400 hover:text-green-600 transition-colors">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+                                <button onclick="showNotification('warning', 'Archive', '${item.code} archived')" class="p-1 text-gray-400 hover:text-orange-600 transition-colors">
+                                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8l6 6 6-6"/>
+                                    </svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+
+            // Update count
+            document.querySelector('.text-gray-500').textContent = `${filteredData.length} of ${mockData.length} codes`;
+        }
+
+        function updateStats() {
+            const active = filteredData.filter(item => item.status === 'Active').length;
+            const archived = filteredData.filter(item => item.status === 'Archived').length;
+            const total = filteredData.length;
+
+            document.querySelector('.text-green-600').textContent = active;
+            document.querySelector('.text-orange-600').textContent = archived;
+            document.querySelector('.text-blue-600').textContent = total;
+        }
+
+        function updateFilterCounter() {
+            const activeFilters = document.querySelectorAll('.filter-checkbox:checked').length;
+            const counter = document.querySelector('.bg-blue-100');
+            counter.textContent = activeFilters;
+            document.querySelector('.text-purple-600').textContent = activeFilters;
+        }
+
+        function clearAllFilters() {
+            document.querySelectorAll('.filter-checkbox').forEach(cb => cb.checked = false);
+            document.querySelectorAll('input[type="text"]').forEach(input => {
+                if (input.placeholder.includes('search')) input.value = '';
+            });
+            document.querySelectorAll('input[type="date"]').forEach(input => input.value = '');
+            
+            applyFilters();
+            showNotification('info', 'Filters Cleared', 'All filters have been reset');
+        }
+
+        function toggleDashboard() {
+            showDashboard = !showDashboard;
+            const dashboard = document.querySelector('.border-b.bg-gray-50');
+            dashboard.style.display = showDashboard ? 'block' : 'none';
+            showNotification('info', 'Dashboard Toggle', showDashboard ? 'Dashboard shown' : 'Dashboard hidden');
+        }
+
+        function showExportDialog() {
+            const formats = ['CSV', 'Excel', 'PDF'];
+            const format = formats[Math.floor(Math.random() * formats.length)];
+            showNotification('success', 'Export Started', `Exporting ${filteredData.length} records as ${format}`);
+        }
+
+        function showAddDialog() {
+            showNotification('info', 'Add Code', 'Opening add code dialog...');
+        }
+
+        function handleHeaderAction(button) {
+            if (button.innerHTML.includes('M20.354 15.354')) {
+                toggleTheme();
+            } else if (button.innerHTML.includes('M15 17h5l')) {
+                showNotification('info', 'Notifications', 'You have 3 new notifications');
+            }
+        }
+
+        function toggleTheme() {
+            isDarkMode = !isDarkMode;
+            document.body.classList.toggle('dark', isDarkMode);
+            showNotification('info', 'Theme Changed', isDarkMode ? 'Switched to dark mode' : 'Switched to light mode');
+        }
+
+        function saveFilter() {
+            const name = document.getElementById('filter-name').value;
+            if (!name) return;
+            
+            const savedFiltersDiv = document.getElementById('saved-filters');
+            const newFilter = document.createElement('button');
+            newFilter.className = 'w-full text-left px-2 py-1 text-sm hover:bg-gray-100 rounded';
+            newFilter.textContent = name;
+            newFilter.onclick = () => loadSavedFilter(name.toLowerCase().replace(/\s+/g, '-'));
+            savedFiltersDiv.appendChild(newFilter);
+            
+            document.getElementById('filter-name').value = '';
+            showNotification('success', 'Filter Saved', `Filter "${name}" has been saved`);
+        }
+
+        function loadSavedFilter(filterName) {
+            clearAllFilters();
+            
+            if (filterName === 'active-highjump') {
+                document.querySelector('.filter-checkbox[data-value="Active"]').checked = true;
+                document.querySelector('.filter-checkbox[data-value="HighJump"]').checked = true;
+            } else if (filterName === 'all-archived') {
+                document.querySelector('.filter-checkbox[data-value="Archived"]').checked = true;
+            }
+            
+            applyFilters();
+            showNotification('info', 'Filter Loaded', `Applied saved filter: ${filterName}`);
+        }
+
+        function showNotification(type, title, message) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0">
+                        ${type === 'success' ? '✅' : type === 'warning' ? '⚠️' : type === 'error' ? '❌' : 'ℹ️'}
+                    </div>
+                    <div class="flex-1">
+                        <h4 class="font-medium text-gray-900">${title}</h4>
+                        <p class="text-sm text-gray-600 mt-1">${message}</p>
+                    </div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
